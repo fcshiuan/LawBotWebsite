@@ -1,0 +1,144 @@
+/* 首頁 */
+.bg-img {
+    background-image: url("https://storage.googleapis.com/lawbot_bucket/img/index_bg.jpg");
+    background-attachment: fixed;
+    background-size:cover;
+
+}
+
+/* 對話 */
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
+    overflow-y: scroll
+}
+
+.chat-message-left,
+.chat-message-right {
+    display: flex;
+    flex-shrink: 0
+}
+
+.chat-message-left {
+    margin-right: auto
+}
+
+.chat-message-right {
+    flex-direction: row-reverse;
+    margin-left: auto
+}
+
+
+/* 輸入傳送按鈕 */
+.py-3 {
+    padding-top: 1rem!important;
+    padding-bottom: 1rem!important;
+}
+.px-4 {
+    padding-right: 1.5rem!important;
+    padding-left: 1.5rem!important;
+}
+.flex-grow-0 {
+    flex-grow: 0!important;
+}
+.border-top {
+    border-top: 1px solid #dee2e6!important;
+}
+
+
+/* 登入登出 */
+
+
+
+.btn-line-login {
+    /* float: right; */
+    border-radius: 20px;
+
+    background-color: #ffffff00;
+    border: 1.5px solid #d2d2d2;
+    color: #d2d2d2;
+    transition-duration: 0.4s;
+
+    
+}
+.btn-line-login:hover {
+    /* background-image:url(../img/btn_login_hover.png); */
+    background-color: #dee2e6;
+    color: black;
+}
+.btn-line-login:active {
+    /* background-image:url(../img/btn_login_press.png); */
+    background-color: cadetblue;
+}
+
+
+
+.navbar-nav {
+    /* text-align: center; */
+    margin: 0px;
+    padding: 0px;
+    
+} 
+
+.btn-logout {
+    /* float: right; */
+    color: #fff;
+    background-color: #7d7d7d;
+    border-radius: 15px;
+    border-width: 1px;
+    border-style: solid;
+    transition-duration: 0.4s;
+    width: 60px;
+    /* height: 30px; */
+}
+
+.btn-logout:hover {
+    background-color: #4C7BB2;
+}
+
+
+
+
+.float-button {
+    position: sticky;
+    bottom: 20px;
+    float: right;
+    right: 20px;
+
+    width: 50px;
+    height: 50px;
+
+    background-color: #4C7BB2;
+    color: #fff;
+
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    z-index: 1000; /* 確保按鈕在最上層 */
+}
+
+
+.btn-primary {
+    background-color: #4C7BB2;
+    border-style: none;
+}
+
+
+.modal-title,.close,.modal-body{
+    color: #373737;
+
+}
+.close{
+    border-style: none;
+    background-color: white;
+}
+
+.modal-body-content {
+    max-height: 300px; /* 设置最大高度 */
+    overflow-y: auto; /* 滚动条 */
+}

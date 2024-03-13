@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Law Bot</title>
+        <meta name="description" content="LawBot 是一個法律智慧問答平台，提供AI法律諮詢服務。 快來尋找您的法律答案！" />
+	    <meta name="keywords" content="LawBot,法律智能問答平台,法律諮詢,ChatGPT,Legal Robot,Legal AI Tool,Law Chatbot,法律諮詢服務,AI法律諮詢,人工智慧法律服務,法律聊天機器人,法律AI工具,法律問答社群,法律技術創新" />
+	
+        <link rel="icon" href="https://storage.googleapis.com/lawbot_bucket/img/logo-gray.svg" type="image/x-icon"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="../static/css/style.css">
+        <script>
+            function Auth() {
+                var URL = 'https://access.line.me/oauth2/v2.1/authorize?';
+                URL += 'response_type=code';
+                URL += '&client_id={{client_id}}';  //請換成你自己的 client_id
+                URL += '&redirect_uri={{end_point}}/line_login'; //請換成你自己的 callback url
+                URL += '&scope=profile%20openid%20email';
+                URL += '&state=123453sdfgfd';
+                //導引到LineLogin
+                window.location.href = URL;
+            }
+            function cont() {
+                window.location.href = '/logout';
+            }
+            function contAreaShow(dialogList) {
+                // var contArea = document.getElementById('contArea');
+                const contArea = document.getElementById('contArea');
+                // show出所有對話
+                let htmlStr = `
+                <div class="chat-message-left pb-4">
+                    <div>
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_lawbot/robot.png" class="rounded-circle mr-1" alt="LawBot" width="50" height="50">
+                        <div class="text-muted small text-nowrap mt-2">LawBot</div>
+                    </div>
+                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
+                        
+                        歡迎使用 LawChat !!<br> 請輸入您想詢問的法律問題
+                    </div>
+                </div>
+                `
+                // var dialogList = {{ dialogList|tojson|safe }};
+                console.log(dialogList, dialogList.length , typeof dialogList)       
+                if (dialogList.length !== 0){
+                    dialogList.forEach(function(item){
+                        htmlStr += `        
+                        <div class="chat-message-right pb-4">
+                            <div>
+                                <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_lawbot/man.png" class="rounded-circle mr-1"  alt="User" width="40" height="40">
+                                <div class="text-muted small text-nowrap mt-2">You</div>
+                            </div>
+                            <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3 ">
+                                ${item.You}
+                            </div>
+                        </div>
+    
+                        <div class="chat-message-left pb-4">
+                            <div>
+                                <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_lawbot/robot.png" class="rounded-circle mr-1" alt="LawBot" width="40" height="40">
+                                <div class="text-muted small text-nowrap mt-2">LawBot</div>
+                            </div>
+                            <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
+                                ${item.LawBot}
+                            </div>
+                        </div>
+                        `
+                    }
+                    )
+                }
+                contArea.innerHTML = htmlStr
+                // return htmlStr
+            }
+
+        </script>
+
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3NXQFVC6H4"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-3NXQFVC6H4');
+        </script>
+    </head>
+
+    <body>
+
+        <!-- header -->
+        <nav class="navbar bg-dark navbar-dark navbar-expand-lg">
+            <div class="container px-2 px-lg-4 ">
+                <!-- logo -->
+                <a class="navbar-brand" href="#">
+                    <img src="https://storage.googleapis.com/lawbot_bucket/img/logo.svg" alt="Law Bot" width="30" height="24" class="d-inline-block align-text-top">
+                    LawBot
+                </a>
+
+                <!-- Nav btn -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Nav -->
+                <div class="collapse navbar-collapse row" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto text-center col-lg-8">
+                        <li class="nav-item ">
+                            <a href="#lawbot" class="nav-link">法律諮詢</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#feature" class="nav-link">服務特色</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#keyword" class="nav-link">常見問題</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#about" class="nav-link">關於我們</a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto text-center col-lg-3 justify-content-lg-end">
+                        <li class="nav-item">
+                            {% if userId %}
+                            <div class="nav-link">{{name}}  <button type="button" class="btn-logout" onclick="cont();">登出</button></div>
+                            {% else %}
+                            <button type="button" class="btn btn-line-login " onclick="Auth();" ><img width="25" height="25" src="https://storage.googleapis.com/lawbot_bucket/img/icons8-line.svg">會員登入</button>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 簡介 -->
+        <div class="text-center border-bottom bg-img">
+            <div class="container">
+                <div class="row p-2 py-4 p-md-5 ">
+                    <div class="col-md-12 col-lg-6 py-xl-5 ">
+                        <h2 class="text-white">法律智能問答平台</h2>
+                        <p class="m-4 text-white">
+                            歡迎來到我們的法律智能問答平台！無論您是企業家、個人用戶還是法律專業人士，我們的平台都能為您提供便捷的法律諮詢服務。
+                        </p>
+                    </div>
+                    <div class="col-md-12 col-lg-6 ">
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.youtube.com/embed/oUr64fWAi4I?si=AgKIJ9Ma_jW4yC4s" title="Law Bot video" alt="Law Bot video" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 法律諮詢 -->
+        <div id="lawbot" class="p-md-5 p-2 py-5 bg-light">
+            <div class="container p-0">
+
+                <h1 class="h3 mb-3  text-center">法律諮詢</h1>
+                
+                <div class="row g-0">
+                    <!-- 對話項目 -->
+                    <div class="col-12 col-lg-7 col-xl-9 mx-auto">
+                        
+                        <div class="card">
+                            <!-- 對話內容 -->
+                            <div class="position-relative">
+                                <div id="contArea" class="chat-messages p-4">
+                                    
+                                </div>
+                                <script> 
+                                    var dialogList = {{ dialogList|tojson|safe }};
+                                    contAreaShow(dialogList); 
+                                </script>
+                            </div>
+                            <!-- 輸入及傳送按鈕 -->
+                            <div class="flex-grow-0 py-3 px-4 border-top">
+                                <form id="myform" class="input-group" method="POST">                           
+                                    <input id="Udata" name="Udata" type="text" class="form-control" placeholder="請輸入您的問題">
+                                    <button id="btnSend" class="btn btn-primary">送出</button>                            
+                                </form>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                    
+            </div>
+        </div>
+
+        <!-- 服務特色 -->
+        <section id="feature" class="py-5 ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 mb-2 text-center">
+                        <h2>服務特色</h2>
+                    </div>
+                </div>
+                <div class="row p-md-5">
+                    <div class="col-sm-6 col-lg-3 text-center">
+                        <img class=" m-4" width="150" height="150" src="https://storage.googleapis.com/lawbot_bucket/img/pg_feature/icon-feature1.svg" alt="自動問答">
+                        <h5>自動問答</h5>
+                        <p class="fs-6 "> 用戶可在問答框中輸入問題，系統將即時提供相關的法律建議和解決方案。</p>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 text-center">
+                        <img class=" m-4" width="150" height="150" src="https://storage.googleapis.com/lawbot_bucket/img/pg_feature/icon-feature3.svg" alt="人工智能專家">
+                        <h5>人工智能專家</h5>
+                        <p class="fs-6 ">提供具備專業的智能法律專家，用戶可就複雜問題進行法律分析和諮詢。</p>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 text-center">
+                        <img class=" m-4" width="150" height="150" src="https://storage.googleapis.com/lawbot_bucket/img/pg_feature/icon-feature2.svg" alt="個性化服務">
+                        <h5>個性化服務</h5>
+                        <p class="fs-6 "> 根據用戶需求和背景提供個性化的法律服務，確保用戶得到最適合的解決方案。</p>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 text-center">
+                        <img class=" m-4" width="150" height="150" src="https://storage.googleapis.com/lawbot_bucket/img/pg_feature/icon-feature4.svg" alt="全天候服務">
+                        <h5>全天候服務</h5>
+                        <p class="fs-6 "> 提供全天候的服務，用戶隨時隨地訪問，獲取法律建議。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 常見問題 -->
+        <section id="keyword" class="p-5 bg-light">
+            <div class="container">
+            <h2 class="text-center mb-4">常見問題</h2>
+            <div class="accordion px-md-5" id="faqAccordion">
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    這個平台是免費的嗎？
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                    是的，我們的平台提供免費的基本服務。您可以在網頁右上方登入會員，即可使用本服務。 
+                    </div>
+                </div>
+                </div>
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    如何聯繫人工智能專家？
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                    您可以在問答框直接與人工智能專家交流，輸入您的問題點擊後即可與專家進行即時交流，並獲取相關的法律建議。
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+        </section>
+        
+        <!-- 關於我們 -->
+        <section id="about" class="p-5 ">
+            <div class="container">
+                
+                <h2 class="text-center mb-4">關於我們</h2>
+                <p class="lead text-center mb-4">專業技術團隊，致力於為您提供最準確、便捷的法律諮詢服務。</p>
+                
+                <div class="row row-cols-1 row-cols-md-4 g-4 px-md-5">
+                    <div class="col rounded border p-5 card h-100 shadow-lg ">
+                        <h4>團隊介紹</h4>
+                        <p>我們團隊由具備豐富經驗的專家組成，確保為您提供高品質的服務。</p>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://img.freepik.com/free-photo/portrait-young-asia-lady-with-positive-expression-arms-crossed-smile-broadly-dressed-casual-clothing-looking-camera-pink-background_7861-3201.jpg?size=626&ext=jpg&uid=R91906132&ga=GA1.2.410898891.1703481338&semt=sph" class="card-img-left" alt="MLOps">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>MLOps</strong>   / 張朔繽</h5>
+                            <p class="card-text">負責專案規劃、模型訓練</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_ViVi.jpg" class="card-img-left" alt="後端工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>後端工程師</strong>   / 王巧薇</h5>
+                            <p class="card-text">負責資料處理</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_YiWen.jpg" class="card-img-left" alt="AI工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>AI工程師</strong>   / 謝雯怡</h5>
+                            <p class="card-text">負責語言模型訓練</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_Hsin.jpg" class="card-img-left" alt="後端工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>後端工程師</strong>   / 林欣儒</h5>
+                            <p class="card-text">負責模型訓練、LineBot開發</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_Fan.jpg" class="card-img-left" alt="前端工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>前端工程師</strong>   / 范宇萱</h5>
+                            <p class="card-text">負責網站開發</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_Tine.jpg" class="card-img-left" alt="資料工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>資料工程師</strong>   / 張正定</h5>
+                            <p class="card-text">負責管理數據處理系統以及數據流的架構</p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-lg">
+                        <img src="https://storage.googleapis.com/lawbot_bucket/img/pg_team/member_Ray.jpg" class="card-img-left" alt="後端工程師">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>後端工程師</strong>   / 張芮</h5>
+                            <p class="card-text">負責後端開發</p>
+                        </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+            </div>
+
+            <div class="container">
+                <div class="row my-5 ">
+                    <div class="col-12 col-md-6 mx-auto py-5 p-md-5 rounded bg-light ">
+                        <div class="row my-2">
+                            <div class="text-center col-12">
+                                <h3><strong>聯絡我們</strong></h3>
+                            </div>
+                            <div class="col-12">
+                                <!-- CONTACT FORM https://github.com/jonmbake/bootstrap3-contact-form -->
+                                <form action="/submit_form" method="post" id="feedbackForm" >
+                                    <div class="form-group">
+                                        <label for="name" class="m-2 fs-5">姓名</label>
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="Name" aria-describedby="nameHelp">
+                                        <span id="nameHelp" class="form-text text-muted" style="display: none;">請輸入你的姓名</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email" class="m-2 fs-5">信箱</label>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" aria-describedby="emailHelp">
+                                        <span id="emailHelp" class="form-text text-muted" style="display: none;">請輸入你的信箱</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="message" class="m-2 fs-5">訊息</label>
+                                        <textarea rows="10" cols="100" class="form-control" id="message" name="message" placeholder="Message" aria-describedby="messageHelp"></textarea>
+                                        <span id="messageHelp" class="form-text text-muted" style="display: none;">請輸入訊息</span>
+                                    </div>
+                                    <button type="submit" id="feedbackSubmit" class="btn btn-primary btn-lg my-3 " style="float: right;"> 送出</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+
+        <!-- Floating button to scroll to top -->
+        <button class="float-button" onclick="scrollTopFunction()" title="回到頂部">&#8593;</button>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>&copy; 2024 法律智能問答平台. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <ul class="list-inline">
+                            <li class="list-inline-item"><a href="#" data-toggle="modal" data-target="#PrivacyPolicy">隱私政策</a></li>
+                            <li class="list-inline-item"><a href="#" data-toggle="modal" data-target="#termsUse">使用條款</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PrivacyPolicy模態框 -->
+                <div class="modal" id="PrivacyPolicy">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- 模態框頭部 -->
+                        <div class="modal-header">
+                        <h4 class="modal-title">隱私政策</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <!-- 模態框主體 -->
+                        <div class="modal-body ">
+                        <div class="modal-body-content">
+
+                            我們尊重並保護您的隱私權。本隱私政策旨在告知您我們收集的個人資訊類型、資訊的使用方式以及與第三方分享資訊的情況。請詳細閱讀以下內容，以了解我們對您的隱私資訊的處理方式。
+                            <br>
+                            <br>
+                            1. 收集的資訊類型：<br>
+                               - 個人資訊：在您使用我們的服務時，我們可能收集您的姓名、電子郵件地址、聯絡電話、居住地址等個人身份資訊。<br>
+                               - 使用資訊：我們可能收集和記錄您使用我們服務的相關資訊，包括但不限於訪問記錄、使用時間、使用頻率等。<br>
+                               - 設備資訊：當您使用我們的服務時，我們可能會自動收集與您的設備相關的資訊，例如您的 IP 地址、設備型號、作業系統版本等。<br>
+                            <br>
+                            2. 資訊的使用方式：<br>
+                               - 我們會使用收集的個人資訊來提供和改進我們的服務，以及向您提供相關的客戶支援。<br>
+                               - 我們可能會使用您的資訊來向您發送服務更新、推廣活動或其他相關信息。<br>
+                               - 我們可能會使用收集的資訊進行內部研究和分析，以改進我們的服務品質和用戶體驗。<br>
+                            <br>
+                            3. 資訊的分享：<br>
+                               - 我們不會將您的個人資訊出售、交易或租借給第三方。<br>
+                               - 在法律要求的情況下，我們可能會向政府部門或法律機構提供您的個人資訊。<br>
+                               - 在保護我們或他人的權益和財產安全時，我們可能會分享您的資訊。<br>
+                            <br>
+                            4. 資訊的保護：<br>
+                               - 我們將採取合理的安全措施來保護您的個人資訊，以防止未經授權的訪問、使用或泄露。<br>
+                               - 我們將定期審查和更新我們的安全措施，以確保您的個人資訊得到妥善保護。<br>
+                            <br>
+                            5. 兒童隱私：<br>
+                               - 我們的服務不面向未滿 18 歲的兒童。如果您是未滿 18 歲的兒童，請勿使用或提供任何個人資訊給我們。<br>
+                            <br>
+                            6. 隱私政策的更新：<br>
+                               - 我們保留隨時更新本隱私政策的權利。我們將在本網站上發布更新後的隱私政策，建議您定期查看以獲取最新信息。<br>
+                            <br>
+                            如果您對我們的隱私政策有任何疑問或意見，請隨時與我們聯繫。<br>
+                        </div>
+                        </div>
+
+                        <!-- 模態框底部 -->
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                        </div>
+
+                    </div>
+                    </div>
+                </div>
+
+                <!-- termsUse模態框 -->
+                <div class="modal" id="termsUse">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- 模態框頭部 -->
+                        <div class="modal-header">
+                        <h4 class="modal-title">使用條款</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <!-- 模態框主體 -->
+                        <div class="modal-body ">
+                        <div class="modal-body-content">
+
+                            請仔細閱讀以下條款，使用我們的服務即表示您同意遵守以下規定：<br>
+                            <br>
+                            1. 使用限制：<br>
+                            - 您同意僅根據適用法律和法規使用我們的服務。<br>
+                            - 您不得以任何形式使用我們的服務從事非法活動或侵犯他人權益的行為。<br>
+                            <br>
+                            2. 帳戶安全：<br>
+                            - 您將對您的帳戶和密碼負有保密責任，並對您帳戶下的所有活動負責。<br>
+                            - 如果您發現您的帳戶出現異常活動，請立即通知我們以防止帳戶遭到盜用。<br>
+                            <br>
+                            3. 服務更改：<br>
+                            - 我們保留隨時更改或終止部分或全部服務的權利，並將在合理範圍內提前通知您。<br>
+                            <br>
+                            4. 免責聲明：<br>
+                            - 我們提供的服務以“現狀”和“可用性”的基礎提供，不對服務的及時性、安全性、完整性和準確性做任何明示或暗示的擔保。<br>
+                            <br>
+                            5. 責任限制：<br>
+                            - 在法律允許的最大範圍內，我們對於因使用或無法使用我們的服務而引起的任何直接、間接、偶然、特殊或懲罰性損失不負任何責任。<br>
+                            <br>
+                            6. 爭議解決：<br>
+                            - 本條款受台灣法律管轄，任何爭議應提交至最近的台灣仲裁機構進行仲裁解決。<br>
+                            <br>
+                            如果您不同意以上任何條款，請立即停止使用我們的服務。<br>
+
+                        </div>
+                        </div>
+
+                        <!-- 模態框底部 -->
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                        </div>
+
+                    </div>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+
+        <!-- 引入Bootstrap JavaScript -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>        
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script type="text/javascript"></script>
+        
+        <script>
+            document.getElementById('myform').addEventListener("submit", function(event){
+                // 阻止表單的默認提交行為
+                event.preventDefault();
+        
+                const Udata = document.getElementById('Udata');
+                
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST","/process_data" ,true);
+                xhr.setRequestHeader("Content-Type" , "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function(){
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+                        
+                        var response = JSON.parse(xhr.responseText)
+                        dialogList = response.dialogList
+                        userId = response.userId
+                        $("#Udata").val("");
+                        if (userId) {
+                            // show出所有對話
+                            contAreaShow(dialogList)
+                            console.log(dialogList)
+                        }else {
+                            alert("歡迎使用 LawChat !! 請登入帳號 ");
+                        }
+
+                    }
+                };
+                xhr.send("Udata="+Udata.value);
+        
+            });
+            
+        </script>
+        <script>
+            // JavaScript code to handle back to top button
+            function scrollTopFunction() {
+                document.body.scrollTop = 0; // For Safari
+                document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+            }
+        </script>
+    
+    </body>
+
+</html>
